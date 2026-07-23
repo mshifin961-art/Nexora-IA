@@ -81,4 +81,75 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E293B',
     padding: 20,
     borderRadius: 18,
-    marginBottom: 
+    marginBottom: 20,
+  },
+  cardTitle: {
+    color: '#94A3B8',
+    fontSize: 16,
+  },
+  amount: {
+    color: '#fff',
+    fontSize: 34,
+    fontWeight: 'bold',
+    marginVertical: 8,
+  },
+  smallText: {
+    color: '#CBD5E1',
+  },
+  billButton: {
+    backgroundColor: '#2563EB',
+    padding: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  billButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  section: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  box: {
+    width: '48%',
+    backgroundColor: '#1E293B',
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  icon: {
+    fontSize: 32,
+    marginBottom: 10,
+  },
+  boxText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  aiCard: {
+    backgroundColor: '#1E293B',
+    padding: 18,
+    borderRadius: 18,
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  aiTitle: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  aiText: {
+    color: '#CBD5E1',
+    lineHeight: 22,
+  },
+});
