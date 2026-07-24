@@ -40,8 +40,11 @@ export default function HomeScreen() {
           value="₹12,540"
         />
 
-        <TouchableOpacity style={styles.billButton}>
-          <Text style={styles.billButtonText}>
+        <TouchableOpacity
+  style={styles.billButton}
+  onPress={() => navigation.navigate("CreateBill")}
+>
+          
             + Create New Bill
           </Text>
         </TouchableOpacity>
