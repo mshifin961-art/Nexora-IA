@@ -13,8 +13,9 @@ import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import StatCard from "../components/StatCard";
 import ActionCard from "../components/ActionCard";
 import BottomNav from "../components/BottomNav";
-
+import { useNavigation } from "@react-navigation/native";
 export default function HomeScreen() {
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
