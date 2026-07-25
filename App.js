@@ -50,7 +50,6 @@ export default function App() {
 />
 
 </Stack.Navigator>
-      </Stack.Navigator>
     </NavigationContainer>
   );
 }
