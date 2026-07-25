@@ -1,7 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import HistoryScreen from "./screens/HistoryScreen";
 import HomeScreen from "./screens/HomeScreen";
 import CreateBillScreen from "./screens/CreateBillScreen";
 
@@ -34,12 +34,22 @@ export default function App() {
         />
 
         <Stack.Screen
-          name="CreateBill"
-          component={CreateBillScreen}
-          options={{
-            title: "Create Bill",
-          }}
-        />
+  name="CreateBill"
+  component={CreateBillScreen}
+  options={{
+    title: "Create Bill",
+  }}
+/>
+
+<Stack.Screen
+  name="History"
+  component={HistoryScreen}
+  options={{
+    title: "Bill History",
+  }}
+/>
+
+</Stack.Navigator>
       </Stack.Navigator>
     </NavigationContainer>
   );
