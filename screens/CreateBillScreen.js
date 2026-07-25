@@ -15,15 +15,42 @@ export default function BillScreen() {
   const [product, setProduct] = useState("");
   const [price, setPrice] = useState("");
   const [qty, setQty] = useState("");
+  const [cart, setCart] = useState([]);
 
-  const total =
-    (parseFloat(price) || 0) * (parseInt(qty) || 0);
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+
+  function addProduct() {
+    if (!product || !price || !qty) return;
+
+    setCart([
+      ...cart,
+      {
+        id: Date.now(),
+        name: product,
+        price: Number(price),
+        qty: Number(qty),
+      },
+    ]);
+
+    setProduct("");
+    setPrice("");
+    setQty("");
+  }
+
+  function removeItem(id) {
+    setCart(cart.filter(item => item.id !== id));
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
 
-        <Text style={styles.title}>🧾 Create New Bill</Text>
+        <Text style={styles.title}>
+          🧾 Create Bill
+        </Text>
 
         <TextInput
           style={styles.input}
@@ -52,9 +79,9 @@ export default function BillScreen() {
 
         <TextInput
           style={styles.input}
-          placeholder="Price (₹)"
-          placeholderTextColor="#888"
+          placeholder="Price"
           keyboardType="numeric"
+          placeholderTextColor="#888"
           value={price}
           onChangeText={setPrice}
         />
@@ -62,18 +89,70 @@ export default function BillScreen() {
         <TextInput
           style={styles.input}
           placeholder="Quantity"
-          placeholderTextColor="#888"
           keyboardType="numeric"
+          placeholderTextColor="#888"
           value={qty}
           onChangeText={setQty}
         />
-                    <View style={styles.totalCard}>
-          <Text style={styles.totalLabel}>Grand Total</Text>
-          <Text style={styles.totalAmount}>₹{total}</Text>
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={addProduct}
+        >
+          <Text style={styles.buttonText}>
+            Add Product
+          </Text>
+        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>
+          Cart
+        </Text>
+
+        {cart.length === 0 ? (
+          <Text style={styles.emptyText}>
+            No products added yet
+          </Text>
+        ) : (
+          cart.map((item) => (
+            <View key={item.id} style={styles.cartItem}>
+              <View>
+                <Text style={styles.productName}>
+                  {item.name}
+                </Text>
+
+                <Text style={styles.productInfo}>
+                  ₹{item.price} × {item.qty}
+                </Text>
+              </View>
+
+              <View style={{ alignItems: "flex-end" }}>
+                <Text style={styles.productTotal}>
+                  ₹{item.price * item.qty}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => removeItem(item.id)}
+                >
+                  <Text style={styles.removeText}>
+                    Remove
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+
+        <View style={styles.totalCard}>
+          <Text style={styles.totalLabel}>
+            Grand Total
+          </Text>
+
+          <Text style={styles.totalAmount}>
+            ₹{total}
+          </Text>
         </View>
 
         <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>
+          <Text style={styles.buttonText}>
             Save Bill
           </Text>
         </TouchableOpacity>
@@ -81,7 +160,7 @@ export default function BillScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+          }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -90,27 +169,88 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
     color: "#FFFFFF",
-    marginBottom: 25,
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
 
   input: {
     backgroundColor: "#1E293B",
     color: "#FFFFFF",
     borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
+    padding: 15,
     fontSize: 16,
+    marginBottom: 12,
+  },
+
+  addButton: {
+    backgroundColor: "#2563EB",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 5,
+    marginBottom: 20,
+  },
+
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "bold",
+  },
+
+  sectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 15,
   },
 
+  emptyText: {
+    color: "#94A3B8",
+    textAlign: "center",
+    marginVertical: 20,
+    fontSize: 16,
+  },
+
+  cartItem: {
+    backgroundColor: "#1E293B",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  productName: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "bold",
+  },
+
+  productInfo: {
+    color: "#94A3B8",
+    marginTop: 5,
+  },
+
+  productTotal: {
+    color: "#22C55E",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+
+  removeText: {
+    color: "#EF4444",
+    marginTop: 8,
+    fontWeight: "bold",
+  },
+
   totalCard: {
-    backgroundColor: "#1D4ED8",
+    backgroundColor: "#2563EB",
     borderRadius: 16,
     padding: 20,
-    marginTop: 20,
+    marginTop: 15,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -130,16 +270,10 @@ const styles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: "#22C55E",
+    padding: 18,
     borderRadius: 14,
-    padding: 16,
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 20,
     marginBottom: 40,
-  },
-
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "bold",
   },
 });
