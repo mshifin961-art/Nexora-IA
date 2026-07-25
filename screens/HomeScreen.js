@@ -49,6 +49,14 @@ export default function HomeScreen() {
             + Create New Bill
           </Text>
         </TouchableOpacity>
+    <TouchableOpacity
+  style={styles.billButton}
+  onPress={() => navigation.navigate("History")}
+>
+  <Text style={styles.billButtonText}>
+    📜 Bill History
+  </Text>
+</TouchableOpacity>
 
         <Text style={styles.sectionTitle}>
           Quick Actions
