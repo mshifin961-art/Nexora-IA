@@ -44,6 +44,7 @@ export default function HomeScreen() {
   style={styles.billButton}
   onPress={() => navigation.navigate("CreateBill")}
 >
+    <Text style={styles.billButtonText}>
           
             + Create New Bill
           </Text>
