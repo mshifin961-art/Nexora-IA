@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function BillScreen() {
   const [customer, setCustomer] = useState("");
@@ -23,12 +25,15 @@ export default function BillScreen() {
   );
 
   function addProduct() {
-    if (!product || !price || !qty) return;
+    if (!product || !price || !qty) {
+      Alert.alert("Missing Details", "Please fill Product, Price and Quantity.");
+      return;
+    }
 
     setCart([
       ...cart,
       {
-        id: Date.now(),
+        id: Date.now().toString(),
         name: product,
         price: Number(price),
         qty: Number(qty),
@@ -41,12 +46,51 @@ export default function BillScreen() {
   }
 
   function removeItem(id) {
-    setCart(cart.filter(item => item.id !== id));
+    setCart(cart.filter((item) => item.id !== id));
+  }
+
+  async function saveBill() {
+    if (cart.length === 0) {
+      Alert.alert("Empty Bill", "Add at least one product.");
+      return;
+    }
+
+    try {
+      const bill = {
+        id: Date.now().toString(),
+        customer,
+        phone,
+        items: cart,
+        total,
+        date: new Date().toLocaleString(),
+      };
+
+      const oldBills =
+        JSON.parse(await AsyncStorage.getItem("bills")) || [];
+
+      oldBills.unshift(bill);
+
+      await AsyncStorage.setItem(
+        "bills",
+        JSON.stringify(oldBills)
+      );
+
+      Alert.alert("Success", "Bill Saved Successfully");
+
+      setCustomer("");
+      setPhone("");
+      setProduct("");
+      setPrice("");
+      setQty("");
+      setCart([]);
+    } catch (e) {
+      Alert.alert("Error", "Unable to save bill");
+    }
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
 
         <Text style={styles.title}>
           🧾 Create Bill
@@ -104,17 +148,18 @@ export default function BillScreen() {
           </Text>
         </TouchableOpacity>
         <Text style={styles.sectionTitle}>
-          Cart
+          Cart Items
         </Text>
 
         {cart.length === 0 ? (
           <Text style={styles.emptyText}>
-            No products added yet
+            No products added yet.
           </Text>
         ) : (
           cart.map((item) => (
             <View key={item.id} style={styles.cartItem}>
-              <View>
+
+              <View style={styles.itemLeft}>
                 <Text style={styles.productName}>
                   {item.name}
                 </Text>
@@ -124,7 +169,7 @@ export default function BillScreen() {
                 </Text>
               </View>
 
-              <View style={{ alignItems: "flex-end" }}>
+              <View style={styles.itemRight}>
                 <Text style={styles.productTotal}>
                   ₹{item.price * item.qty}
                 </Text>
@@ -136,12 +181,15 @@ export default function BillScreen() {
                     Remove
                   </Text>
                 </TouchableOpacity>
+
               </View>
+
             </View>
           ))
         )}
 
         <View style={styles.totalCard}>
+
           <Text style={styles.totalLabel}>
             Grand Total
           </Text>
@@ -149,9 +197,13 @@ export default function BillScreen() {
           <Text style={styles.totalAmount}>
             ₹{total}
           </Text>
+
         </View>
 
-        <TouchableOpacity style={styles.saveButton}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={saveBill}
+        >
           <Text style={styles.buttonText}>
             Save Bill
           </Text>
@@ -186,10 +238,9 @@ const styles = StyleSheet.create({
 
   addButton: {
     backgroundColor: "#2563EB",
-    padding: 16,
     borderRadius: 12,
+    padding: 16,
     alignItems: "center",
-    marginTop: 5,
     marginBottom: 20,
   },
 
@@ -223,6 +274,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  itemLeft: {
+    flex: 1,
+  },
+
+  itemRight: {
+    alignItems: "flex-end",
+  },
+
   productName: {
     color: "#FFFFFF",
     fontSize: 17,
@@ -231,7 +290,7 @@ const styles = StyleSheet.create({
 
   productInfo: {
     color: "#94A3B8",
-    marginTop: 5,
+    marginTop: 4,
   },
 
   productTotal: {
@@ -270,8 +329,8 @@ const styles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: "#22C55E",
-    padding: 18,
     borderRadius: 14,
+    padding: 18,
     alignItems: "center",
     marginTop: 20,
     marginBottom: 40,
