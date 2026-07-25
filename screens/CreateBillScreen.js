@@ -1,100 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 
-export default function CreateBillScreen() {
+export default function BillScreen() {
+  const [customer, setCustomer] = useState("");
+  const [phone, setPhone] = useState("");
+  const [product, setProduct] = useState("");
+  const [price, setPrice] = useState("");
+  const [qty, setQty] = useState("");
+
+  const total =
+    (parseFloat(price) || 0) * (parseInt(qty) || 0);
+
   return (
     <SafeAreaView style={styles.container}>
-
       <ScrollView>
 
-        <Text style={styles.title}>
-          Create New Bill
-        </Text>
-
-        <Text style={styles.label}>
-          Customer Name
-        </Text>
+        <Text style={styles.title}>🧾 Create New Bill</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Enter customer name"
-          placeholderTextColor="#94A3B8"
+          placeholder="Customer Name"
+          placeholderTextColor="#888"
+          value={customer}
+          onChangeText={setCustomer}
         />
 
-        <Text style={styles.label}>
-          Product Name
-        </Text>
-
         <TextInput
           style={styles.input}
-          placeholder="Enter product"
-          placeholderTextColor="#94A3B8"
+          placeholder="Phone Number"
+          placeholderTextColor="#888"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
         />
 
-        <Text style={styles.label}>
-          Quantity
-        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Product Name"
+          placeholderTextColor="#888"
+          value={product}
+          onChangeText={setProduct}
+        />
 
         <TextInput
           style={styles.input}
-          placeholder="1"
+          placeholder="Price (₹)"
+          placeholderTextColor="#888"
           keyboardType="numeric"
-          placeholderTextColor="#94A3B8"
+          value={price}
+          onChangeText={setPrice}
         />
-
-        <Text style={styles.label}>
-          Price
-        </Text>
 
         <TextInput
           style={styles.input}
-          placeholder="₹0"
+          placeholder="Quantity"
+          placeholderTextColor="#888"
           keyboardType="numeric"
-          placeholderTextColor="#94A3B8"
+          value={qty}
+          onChangeText={setQty}
         />
-
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>
-            Add Product
-          </Text>
-        </TouchableOpacity>
-        <Text style={styles.sectionTitle}>
-          Products Added
-        </Text>
-
-        <View style={styles.productCard}>
-          <View style={styles.productRow}>
-            <Text style={styles.productName}>Milk</Text>
-            <Text style={styles.productPrice}>₹60</Text>
-          </View>
-
-          <View style={styles.productRow}>
-            <Text style={styles.productName}>Bread</Text>
-            <Text style={styles.productPrice}>₹40</Text>
-          </View>
-
-          <View style={styles.productRow}>
-            <Text style={styles.productName}>Eggs</Text>
-            <Text style={styles.productPrice}>₹120</Text>
-          </View>
-        </View>
-
-        <View style={styles.totalCard}>
-          <Text style={styles.totalText}>
-            Total
-          </Text>
-
-          <Text style={styles.totalAmount}>
-            ₹220
-          </Text>
+                    <View style={styles.totalCard}>
+          <Text style={styles.totalLabel}>Grand Total</Text>
+          <Text style={styles.totalAmount}>₹{total}</Text>
         </View>
 
         <TouchableOpacity style={styles.saveButton}>
@@ -115,17 +90,10 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: "#FFFFFF",
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#FFFFFF",
     marginBottom: 25,
-  },
-
-  label: {
-    color: "#CBD5E1",
-    fontSize: 15,
-    marginBottom: 8,
-    marginTop: 12,
   },
 
   input: {
@@ -135,63 +103,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 14,
     fontSize: 16,
-  },
-
-  button: {
-    backgroundColor: "#2563EB",
-    borderRadius: 14,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 25,
-  },
-
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 17,
-  },
-
-  sectionTitle: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "bold",
-    marginTop: 30,
     marginBottom: 15,
   },
 
-  productCard: {
-    backgroundColor: "#1E293B",
-    borderRadius: 16,
-    padding: 18,
-  },
-
-  productRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 14,
-  },
-
-  productName: {
-    color: "#FFFFFF",
-    fontSize: 17,
-  },
-
-  productPrice: {
-    color: "#22C55E",
-    fontWeight: "bold",
-    fontSize: 17,
-  },
-
   totalCard: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "#1D4ED8",
     borderRadius: 16,
-    padding: 18,
+    padding: 20,
     marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
 
-  totalText: {
+  totalLabel: {
     color: "#FFFFFF",
     fontSize: 20,
     fontWeight: "bold",
@@ -199,14 +124,14 @@ const styles = StyleSheet.create({
 
   totalAmount: {
     color: "#FFFFFF",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
   },
 
   saveButton: {
     backgroundColor: "#22C55E",
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 14,
+    padding: 16,
     alignItems: "center",
     marginTop: 25,
     marginBottom: 40,
