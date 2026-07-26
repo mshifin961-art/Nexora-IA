@@ -10,7 +10,8 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import Share from "react-native-share";
 export default function BillScreen() {
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
