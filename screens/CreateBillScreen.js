@@ -229,6 +229,14 @@ export default function BillScreen() {
             Save Bill
           </Text>
         </TouchableOpacity>
+            <TouchableOpacity
+  style={styles.shareButton}
+  onPress={generatePDF}
+>
+  <Text style={styles.shareButtonText}>
+    📄 Generate & Share PDF
+  </Text>
+</TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
