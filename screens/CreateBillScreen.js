@@ -117,22 +117,25 @@ export default function BillScreen() {
 
     const pdf = await RNHTMLtoPDF.convert({
       html,
-      fileName: "Bill_" + Date.now(),
+      fileName: `Bill_${Date.now()}`,
       directory: "Documents",
     });
 
-    console.log("PDF Created:", pdf);
+    console.log("PDF RESULT:", JSON.stringify(pdf));
+
+    Alert.alert("Debug", JSON.stringify(pdf));
+
+    if (!pdf.filePath) {
+      throw new Error("PDF filePath not found");
+    }
 
     await Share.open({
-      url: "file://" + pdf.filePath,
+      url: `file://${pdf.filePath}`,
+      type: "application/pdf",
     });
-
   } catch (e) {
     console.log("PDF ERROR:", e);
-    Alert.alert(
-      "PDF Error",
-      e?.message ? e.message : JSON.stringify(e)
-    );
+    Alert.alert("PDF Error", String(e));
   }
   }
     return (
