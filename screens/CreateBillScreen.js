@@ -106,33 +106,34 @@ export default function BillScreen() {
   }
 
   async function generatePDF() {
-    try {
-      const html = `
+  try {
+    const html = `
       <h1>BillNova AI</h1>
-      <h3>Customer : ${customer}</h3>
-      <h3>Phone : ${phone}</h3>
-      <h3>Total : ₹${total}</h3>
-      <p>Date : ${new Date().toLocaleString()}</p>
-      `;
+      <h3>Customer: ${customer}</h3>
+      <h3>Phone: ${phone}</h3>
+      <h3>Total: ₹${total}</h3>
+      <p>Date: ${new Date().toLocaleString()}</p>
+    `;
 
-      const pdf =
-        await RNHTMLtoPDF.convert({
-          html,
-          fileName:
-            "Bill_" + Date.now(),
-          directory: "Documents",
-        });
+    const pdf = await RNHTMLtoPDF.convert({
+      html,
+      fileName: "Bill_" + Date.now(),
+      directory: "Documents",
+    });
 
-      await Share.open({
-        url:
-          "file://" + pdf.filePath,
-      });
-    } catch (e) {
-      Alert.alert(
-        "PDF Error",
-        "Unable to generate PDF"
-      );
-    }
+    console.log("PDF Created:", pdf);
+
+    await Share.open({
+      url: "file://" + pdf.filePath,
+    });
+
+  } catch (e) {
+    console.log("PDF ERROR:", e);
+    Alert.alert(
+      "PDF Error",
+      e?.message ? e.message : JSON.stringify(e)
+    );
+  }
   }
     return (
     <SafeAreaView style={styles.container}>
