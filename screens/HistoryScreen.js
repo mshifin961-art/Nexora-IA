@@ -82,6 +82,14 @@ export default function HistoryScreen() {
               <Text style={styles.date}>
                 📅 {bill.date}
               </Text>
+                <TouchableOpacity
+  style={styles.deleteButton}
+  onPress={() => deleteBill(bill.id)}
+>
+  <Text style={styles.deleteText}>
+    🗑 Delete Bill
+  </Text>
+</TouchableOpacity>
 
             </View>
           ))
@@ -90,7 +98,7 @@ export default function HistoryScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-            }
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -143,4 +151,17 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     fontSize: 14,
   },
+  deleteButton: {
+  marginTop: 12,
+  backgroundColor: "#E53935",
+  paddingVertical: 10,
+  borderRadius: 10,
+  alignItems: "center",
+},
+
+deleteText: {
+  color: "#FFFFFF",
+  fontWeight: "bold",
+  fontSize: 16,
+},
 });
