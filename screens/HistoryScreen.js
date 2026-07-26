@@ -24,7 +24,34 @@ export default function HistoryScreen() {
       setBills(JSON.parse(data));
     }
   }
+  async function deleteBill(id) {
+  Alert.alert(
+    "Delete Bill",
+    "Are you sure you want to delete this bill?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updatedBills = bills.filter(
+            (bill) => bill.id !== id
+          );
 
+          setBills(updatedBills);
+
+          await AsyncStorage.setItem(
+            "bills",
+            JSON.stringify(updatedBills)
+          );
+        },
+      },
+    ]
+  );
+  }
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
