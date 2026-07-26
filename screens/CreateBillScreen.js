@@ -88,6 +88,26 @@ export default function BillScreen() {
       Alert.alert("Error", "Unable to save bill");
     }
   }
+  async function generatePDF() {
+  const html = `
+    <h1>BillNova AI</h1>
+    <hr />
+    <h3>Customer: ${customer}</h3>
+    <p>Phone: ${phone}</p>
+    <p>Total: ₹${total}</p>
+    <p>Date: ${new Date().toLocaleString()}</p>
+  `;
+
+  const file = await RNHTMLtoPDF.convert({
+    html,
+    fileName: "BillNova_Bill",
+    directory: "Documents",
+  });
+
+  await Share.open({
+    url: "file://" + file.filePath,
+  });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
