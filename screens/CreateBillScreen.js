@@ -9,9 +9,11 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import Share from "react-native-share";
+
 export default function BillScreen() {
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
@@ -27,7 +29,10 @@ export default function BillScreen() {
 
   function addProduct() {
     if (!product || !price || !qty) {
-      Alert.alert("Missing Details", "Please fill Product, Price and Quantity.");
+      Alert.alert(
+        "Missing Details",
+        "Please fill Product, Price and Quantity."
+      );
       return;
     }
 
@@ -52,7 +57,10 @@ export default function BillScreen() {
 
   async function saveBill() {
     if (cart.length === 0) {
-      Alert.alert("Empty Bill", "Add at least one product.");
+      Alert.alert(
+        "Empty Bill",
+        "Add at least one product."
+      );
       return;
     }
 
@@ -67,7 +75,9 @@ export default function BillScreen() {
       };
 
       const oldBills =
-        JSON.parse(await AsyncStorage.getItem("bills")) || [];
+        JSON.parse(
+          await AsyncStorage.getItem("bills")
+        ) || [];
 
       oldBills.unshift(bill);
 
@@ -76,7 +86,10 @@ export default function BillScreen() {
         JSON.stringify(oldBills)
       );
 
-      Alert.alert("Success", "Bill Saved Successfully");
+      Alert.alert(
+        "Success",
+        "Bill Saved Successfully"
+      );
 
       setCustomer("");
       setPhone("");
@@ -85,37 +98,47 @@ export default function BillScreen() {
       setQty("");
       setCart([]);
     } catch (e) {
-      Alert.alert("Error", "Unable to save bill");
+      Alert.alert(
+        "Error",
+        "Unable to save bill"
+      );
     }
   }
+
   async function generatePDF() {
-  const html = `
-    <h1>BillNova AI</h1>
-    <hr />
-    <h3>Customer: ${customer}</h3>
-    <p>Phone: ${phone}</p>
-    <p>Total: ₹${total}</p>
-    <p>Date: ${new Date().toLocaleString()}</p>
-  `;
+    try {
+      const html = `
+      <h1>BillNova AI</h1>
+      <h3>Customer : ${customer}</h3>
+      <h3>Phone : ${phone}</h3>
+      <h3>Total : ₹${total}</h3>
+      <p>Date : ${new Date().toLocaleString()}</p>
+      `;
 
-  const file = await RNHTMLtoPDF.convert({
-    html,
-    fileName: "BillNova_Bill",
-    directory: "Documents",
-  });
+      const pdf =
+        await RNHTMLtoPDF.convert({
+          html,
+          fileName:
+            "Bill_" + Date.now(),
+          directory: "Documents",
+        });
 
-  await Share.open({
-    url: "file://" + file.filePath,
-  });
+      await Share.open({
+        url:
+          "file://" + pdf.filePath,
+      });
+    } catch (e) {
+      Alert.alert(
+        "PDF Error",
+        "Unable to generate PDF"
+      );
+    }
   }
-
-  return (
+    return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        <Text style={styles.title}>
-          🧾 Create Bill
-        </Text>
+        <Text style={styles.title}>🧾 Create Bill</Text>
 
         <TextInput
           style={styles.input}
@@ -168,6 +191,7 @@ export default function BillScreen() {
             Add Product
           </Text>
         </TouchableOpacity>
+
         <Text style={styles.sectionTitle}>
           Cart Items
         </Text>
@@ -210,7 +234,6 @@ export default function BillScreen() {
         )}
 
         <View style={styles.totalCard}>
-
           <Text style={styles.totalLabel}>
             Grand Total
           </Text>
@@ -218,7 +241,6 @@ export default function BillScreen() {
           <Text style={styles.totalAmount}>
             ₹{total}
           </Text>
-
         </View>
 
         <TouchableOpacity
@@ -229,19 +251,20 @@ export default function BillScreen() {
             Save Bill
           </Text>
         </TouchableOpacity>
-            <TouchableOpacity
-  style={styles.shareButton}
-  onPress={generatePDF}
->
-  <Text style={styles.shareButtonText}>
-    📄 Generate & Share PDF
-  </Text>
-</TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.pdfButton}
+          onPress={generatePDF}
+        >
+          <Text style={styles.pdfButtonText}>
+            📄 Generate & Share PDF
+          </Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
   );
-          }
+            }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -362,20 +385,20 @@ const styles = StyleSheet.create({
     padding: 18,
     alignItems: "center",
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 15,
   },
 
   pdfButton: {
-  backgroundColor: "#E53935",
-  borderRadius: 14,
-  padding: 18,
-  alignItems: "center",
-  marginBottom: 20,
-},
+    backgroundColor: "#E53935",
+    borderRadius: 14,
+    padding: 18,
+    alignItems: "center",
+    marginBottom: 40,
+  },
 
-pdfButtonText: {
-  color: "#FFFFFF",
-  fontSize: 17,
-  fontWeight: "bold",
-},
+  pdfButtonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "bold",
+  },
 });
