@@ -364,4 +364,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 40,
   },
+
+  pdfButton: {
+  backgroundColor: "#E53935",
+  borderRadius: 14,
+  padding: 18,
+  alignItems: "center",
+  marginBottom: 20,
+},
+
+pdfButtonText: {
+  color: "#FFFFFF",
+  fontSize: 17,
+  fontWeight: "bold",
+},
 });
