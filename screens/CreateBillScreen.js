@@ -11,8 +11,8 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import RNHTMLtoPDF from "react-native-html-to-pdf";
-import Share from "react-native-share";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 export default function BillScreen() {
   const [customer, setCustomer] = useState("");
@@ -104,171 +104,243 @@ export default function BillScreen() {
       );
     }
   }
-
   async function generatePDF() {
   try {
-    const html = `
-      <h1>BillNova AI</h1>
-      <h3>Customer: ${customer}</h3>
-      <h3>Phone: ${phone}</h3>
-      <h3>Total: ₹${total}</h3>
-      <p>Date: ${new Date().toLocaleString()}</p>
-    `;
-
-    const pdf = await RNHTMLtoPDF.convert({
-      html,
-      fileName: `Bill_${Date.now()}`,
-      directory: "Documents",
-    });
-
-    console.log("PDF RESULT:", JSON.stringify(pdf));
-
-    Alert.alert("Debug", JSON.stringify(pdf));
-
-    if (!pdf.filePath) {
-      throw new Error("PDF filePath not found");
+    if (cart.length === 0) {
+      Alert.alert(
+        "Empty Bill",
+        "Please add at least one product."
+      );
+      return;
     }
 
-    await Share.open({
-      url: `file://${pdf.filePath}`,
-      type: "application/pdf",
+    const itemsHtml = cart
+      .map(
+        (item) => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>₹${item.price}</td>
+          <td>₹${item.price * item.qty}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const html = `
+      <html>
+      <head>
+        <style>
+          body{
+            font-family: Arial;
+            padding:20px;
+          }
+
+          h1{
+            text-align:center;
+            color:#2563EB;
+          }
+
+          table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+          }
+
+          th,td{
+            border:1px solid #ccc;
+            padding:8px;
+            text-align:center;
+          }
+
+          th{
+            background:#2563EB;
+            color:white;
+          }
+
+          .total{
+            margin-top:20px;
+            text-align:right;
+            font-size:20px;
+            font-weight:bold;
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <h1>Nexora AI</h1>
+
+        <p><b>Customer:</b> ${customer}</p>
+        <p><b>Phone:</b> ${phone}</p>
+        <p><b>Date:</b> ${new Date().toLocaleString()}</p>
+
+        <table>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+
+          ${itemsHtml}
+
+        </table>
+
+        <p class="total">
+          Grand Total : ₹${total}
+        </p>
+
+      </body>
+      </html>
+    `;
+
+    const { uri } = await Print.printToFileAsync({
+      html,
     });
+
+    await Sharing.shareAsync(uri);
+
   } catch (e) {
-    console.log("PDF ERROR:", e);
-    Alert.alert("PDF Error", String(e));
+    console.log(e);
+    Alert.alert(
+      "PDF Error",
+      String(e)
+    );
   }
   }
-    return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+  return (
+  <SafeAreaView style={styles.container}>
+    <ScrollView showsVerticalScrollIndicator={false}>
 
-        <Text style={styles.title}>🧾 Create Bill</Text>
+      <Text style={styles.title}>
+        🧾 Create Bill
+      </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Customer Name"
-          placeholderTextColor="#888"
-          value={customer}
-          onChangeText={setCustomer}
-        />
+      <TextInput
+        style={styles.input}
+        placeholder="Customer Name"
+        placeholderTextColor="#888"
+        value={customer}
+        onChangeText={setCustomer}
+      />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Phone Number"
-          placeholderTextColor="#888"
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
+      <TextInput
+        style={styles.input}
+        placeholder="Phone Number"
+        placeholderTextColor="#888"
+        keyboardType="phone-pad"
+        value={phone}
+        onChangeText={setPhone}
+      />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Product Name"
-          placeholderTextColor="#888"
-          value={product}
-          onChangeText={setProduct}
-        />
+      <TextInput
+        style={styles.input}
+        placeholder="Product Name"
+        placeholderTextColor="#888"
+        value={product}
+        onChangeText={setProduct}
+      />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Price"
-          keyboardType="numeric"
-          placeholderTextColor="#888"
-          value={price}
-          onChangeText={setPrice}
-        />
+      <TextInput
+        style={styles.input}
+        placeholder="Price"
+        keyboardType="numeric"
+        placeholderTextColor="#888"
+        value={price}
+        onChangeText={setPrice}
+      />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Quantity"
-          keyboardType="numeric"
-          placeholderTextColor="#888"
-          value={qty}
-          onChangeText={setQty}
-        />
+      <TextInput
+        style={styles.input}
+        placeholder="Quantity"
+        keyboardType="numeric"
+        placeholderTextColor="#888"
+        value={qty}
+        onChangeText={setQty}
+      />
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={addProduct}
-        >
-          <Text style={styles.buttonText}>
-            Add Product
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.sectionTitle}>
-          Cart Items
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={addProduct}
+      >
+        <Text style={styles.buttonText}>
+          Add Product
         </Text>
+      </TouchableOpacity>
 
-        {cart.length === 0 ? (
-          <Text style={styles.emptyText}>
-            No products added yet.
-          </Text>
-        ) : (
-          cart.map((item) => (
-            <View key={item.id} style={styles.cartItem}>
+      <Text style={styles.sectionTitle}>
+        Cart Items
+      </Text>
 
-              <View style={styles.itemLeft}>
-                <Text style={styles.productName}>
-                  {item.name}
+      {cart.length === 0 ? (
+        <Text style={styles.emptyText}>
+          No products added yet.
+        </Text>
+      ) : (
+        cart.map((item) => (
+          <View key={item.id} style={styles.cartItem}>
+
+            <View style={styles.itemLeft}>
+              <Text style={styles.productName}>
+                {item.name}
+              </Text>
+
+              <Text style={styles.productInfo}>
+                ₹{item.price} × {item.qty}
+              </Text>
+            </View>
+
+            <View style={styles.itemRight}>
+              <Text style={styles.productTotal}>
+                ₹{item.price * item.qty}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => removeItem(item.id)}
+              >
+                <Text style={styles.removeText}>
+                  Remove
                 </Text>
-
-                <Text style={styles.productInfo}>
-                  ₹{item.price} × {item.qty}
-                </Text>
-              </View>
-
-              <View style={styles.itemRight}>
-                <Text style={styles.productTotal}>
-                  ₹{item.price * item.qty}
-                </Text>
-
-                <TouchableOpacity
-                  onPress={() => removeItem(item.id)}
-                >
-                  <Text style={styles.removeText}>
-                    Remove
-                  </Text>
-                </TouchableOpacity>
-
-              </View>
+              </TouchableOpacity>
 
             </View>
-          ))
-        )}
 
-        <View style={styles.totalCard}>
-          <Text style={styles.totalLabel}>
-            Grand Total
-          </Text>
+          </View>
+        ))
+      )}
+      <View style={styles.totalCard}>
+        <Text style={styles.totalLabel}>
+          Grand Total
+        </Text>
 
-          <Text style={styles.totalAmount}>
-            ₹{total}
-          </Text>
-        </View>
+        <Text style={styles.totalAmount}>
+          ₹{total}
+        </Text>
+      </View>
 
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={saveBill}
-        >
-          <Text style={styles.buttonText}>
-            Save Bill
-          </Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={saveBill}
+      >
+        <Text style={styles.buttonText}>
+          Save Bill
+        </Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.pdfButton}
-          onPress={generatePDF}
-        >
-          <Text style={styles.pdfButtonText}>
-            📄 Generate & Share PDF
-          </Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.pdfButton}
+        onPress={generatePDF}
+      >
+        <Text style={styles.pdfButtonText}>
+          📄 Generate & Share PDF
+        </Text>
+      </TouchableOpacity>
 
-      </ScrollView>
-    </SafeAreaView>
-  );
-            }
+    </ScrollView>
+  </SafeAreaView>
+);
+                }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
