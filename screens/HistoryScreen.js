@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
- Text,
+  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   Alert,
   TextInput,
+  Modal,
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -315,6 +316,12 @@ const [selectedBill, setSelectedBill] = useState(null);
                 >
                   <Share2 size={20} color="#FFFFFF" />
                 </TouchableOpacity>
+                    <TouchableOpacity
+  style={styles.viewButton}
+  onPress={() => setSelectedBill(bill)}
+>
+  <Eye size={20} color="#FFFFFF" />
+</TouchableOpacity>
 
               </View>
 
@@ -337,6 +344,81 @@ const [selectedBill, setSelectedBill] = useState(null);
         )}
 
       </ScrollView>
+        <Modal
+  visible={selectedBill !== null}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setSelectedBill(null)}
+>
+  <View
+    style={{
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.6)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+    }}
+  >
+    <View
+      style={{
+        width: "100%",
+        backgroundColor: "#1E293B",
+        borderRadius: 20,
+        padding: 20,
+      }}
+    >
+      <Text
+        style={{
+          color: "#FFFFFF",
+          fontSize: 22,
+          fontWeight: "bold",
+          marginBottom: 15,
+        }}
+      >
+        Bill Details
+      </Text>
+
+      {selectedBill && (
+        <>
+          <Text style={{ color: "#FFFFFF", marginBottom: 8 }}>
+            Customer: {selectedBill.customer}
+          </Text>
+
+          <Text style={{ color: "#FFFFFF", marginBottom: 8 }}>
+            Phone: {selectedBill.phone}
+          </Text>
+
+          <Text style={{ color: "#22C55E", marginBottom: 8 }}>
+            Total: ₹{selectedBill.total}
+          </Text>
+
+          <Text style={{ color: "#94A3B8", marginBottom: 15 }}>
+            Date: {selectedBill.date}
+          </Text>
+        </>
+      )}
+
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#2563EB",
+          padding: 14,
+          borderRadius: 14,
+          alignItems: "center",
+        }}
+        onPress={() => setSelectedBill(null)}
+      >
+        <Text
+          style={{
+            color: "#FFFFFF",
+            fontWeight: "bold",
+          }}
+        >
+          Close
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -458,6 +540,14 @@ summaryValue: {
   height: 52,
   borderRadius: 16,
   backgroundColor: "#22C55E",
+  justifyContent: "center",
+  alignItems: "center",
+},
+  viewButton: {
+  width: 52,
+  height: 52,
+  borderRadius: 16,
+  backgroundColor: "#7C3AED",
   justifyContent: "center",
   alignItems: "center",
 },
