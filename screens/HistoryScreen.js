@@ -13,11 +13,29 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import {
+  Search,
+  UserRound,
+  Phone,
+  CalendarDays,
+  IndianRupee,
+  FileText,
+  Share2,
+  Trash2,
+  Eye,
+} from "lucide-react-native";
 
 export default function HistoryScreen() {
 
   const [bills, setBills] = useState([]);
   const [search, setSearch] = useState("");
+  const [todaySales, setTodaySales] = useState(0);
+
+const [totalSales, setTotalSales] = useState(0);
+
+const [totalBills, setTotalBills] = useState(0);
+
+const [selectedBill, setSelectedBill] = useState(null);
 
   useEffect(() => {
     loadBills();
@@ -28,9 +46,32 @@ export default function HistoryScreen() {
       const data = await AsyncStorage.getItem("bills");
 
       if (data) {
-        setBills(JSON.parse(data));
-      } else {
-        setBills([]);
+  const parsed = JSON.parse(data);
+
+  setBills(parsed);
+
+  const today = new Date().toLocaleDateString();
+
+  let total = 0;
+  let todayTotal = 0;
+
+  parsed.forEach((bill) => {
+    total += Number(bill.total || 0);
+
+    if (bill.date === today) {
+      todayTotal += Number(bill.total || 0);
+    }
+  });
+
+  setTotalBills(parsed.length);
+  setTotalSales(total);
+  setTodaySales(todayTotal);
+
+} else {
+  setBills([]);
+  setTotalBills(0);
+  setTotalSales(0);
+  setTodaySales(0);
       }
     } catch (e) {
       Alert.alert("Error", "Unable to load bills");
@@ -162,14 +203,57 @@ export default function HistoryScreen() {
         <Text style={styles.title}>
           Bill History
         </Text>
+      <View style={styles.summaryRow}>
 
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search customer..."
-          placeholderTextColor="#94A3B8"
-          value={search}
-          onChangeText={setSearch}
-        />
+  <View style={styles.summaryCard}>
+    <Text style={styles.summaryTitle}>
+      Bills
+    </Text>
+
+    <Text style={styles.summaryValue}>
+      {totalBills}
+    </Text>
+  </View>
+
+  <View style={styles.summaryCard}>
+    <Text style={styles.summaryTitle}>
+      Today
+    </Text>
+
+    <Text style={styles.summaryValue}>
+      ₹{todaySales}
+    </Text>
+  </View>
+
+  <View style={styles.summaryCard}>
+    <Text style={styles.summaryTitle}>
+      Total
+    </Text>
+
+    <Text style={styles.summaryValue}>
+      ₹{totalSales}
+    </Text>
+  </View>
+
+</View>
+      
+
+        <View style={styles.searchContainer}>
+
+  <Search
+    size={20}
+    color="#94A3B8"
+  />
+
+  <TextInput
+    style={styles.searchInput}
+    placeholder="Search customer..."
+    placeholderTextColor="#94A3B8"
+    value={search}
+    onChangeText={setSearch}
+  />
+
+</View>
 
         {filteredBills.length === 0 ? (
 
@@ -182,9 +266,23 @@ export default function HistoryScreen() {
           filteredBills.map((bill) => (
 
             <View
-              key={bill.id}
-              style={styles.billCard}
-            >
+  key={bill.id}
+  style={[
+    styles.billCard,
+    {
+      borderWidth: 1,
+      borderColor: "#334155",
+      shadowColor: "#000",
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      shadowOffset: {
+        width: 0,
+        height: 6,
+      },
+      elevation: 8,
+    },
+  ]}
+>
 
               <Text style={styles.customer}>
                 👤 {bill.customer || "Unknown Customer"}
@@ -208,18 +306,14 @@ export default function HistoryScreen() {
                   style={styles.pdfButton}
                   onPress={() => generatePDF(bill)}
                 >
-                  <Text style={styles.buttonText}>
-                    📄 PDF
-                  </Text>
+                  <FileText size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.shareButton}
                   onPress={() => sharePDF(bill)}
                 >
-                  <Text style={styles.buttonText}>
-                    📤 Share
-                  </Text>
+                  <Share2 size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
               </View>
@@ -228,9 +322,12 @@ export default function HistoryScreen() {
                 style={styles.deleteButton}
                 onPress={() => deleteBill(bill.id)}
               >
-                <Text style={styles.deleteText}>
-                  🗑 Delete Bill
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+  <Trash2 size={18} color="#FFFFFF" />
+  <Text style={[styles.deleteText, { marginLeft: 8 }]}>
+    Delete Bill
+  </Text>
+</View>
               </TouchableOpacity>
 
             </View>
@@ -257,14 +354,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  searchInput: {
-    backgroundColor: "#1E293B",
-    color: "#FFFFFF",
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    marginBottom: 20,
-  },
+  searchContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#1E293B",
+  borderRadius: 14,
+  paddingHorizontal: 14,
+  marginBottom: 20,
+},
+
+searchInput: {
+  flex: 1,
+  color: "#FFFFFF",
+  fontSize: 16,
+  paddingVertical: 14,
+  marginLeft: 10,
+},
 
   emptyText: {
     color: "#94A3B8",
@@ -274,11 +379,11 @@ const styles = StyleSheet.create({
   },
 
   billCard: {
-    backgroundColor: "#1E293B",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-  },
+  backgroundColor: "#1E293B",
+  borderRadius: 20,
+  padding: 20,
+  marginBottom: 18,
+},
 
   customer: {
     color: "#FFFFFF",
@@ -305,31 +410,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 14,
   },
+  summaryRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 20,
+},
+
+summaryCard: {
+  flex: 1,
+  backgroundColor: "#1E293B",
+  borderRadius: 16,
+  paddingVertical: 16,
+  alignItems: "center",
+  marginHorizontal: 4,
+},
+
+summaryTitle: {
+  color: "#94A3B8",
+  fontSize: 13,
+  marginBottom: 6,
+},
+
+summaryValue: {
+  color: "#FFFFFF",
+  fontSize: 20,
+  fontWeight: "bold",
+},
 
   buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 14,
+  marginBottom: 14,
+},
 
   pdfButton: {
-    flex: 1,
-    backgroundColor: "#2563EB",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginRight: 8,
-  },
+  width: 52,
+  height: 52,
+  borderRadius: 16,
+  backgroundColor: "#2563EB",
+  justifyContent: "center",
+  alignItems: "center",
+},
 
   shareButton: {
-    flex: 1,
-    backgroundColor: "#22C55E",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginLeft: 8,
-  },
-
+  width: 52,
+  height: 52,
+  borderRadius: 16,
+  backgroundColor: "#22C55E",
+  justifyContent: "center",
+  alignItems: "center",
+},
+  
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
@@ -337,11 +469,11 @@ const styles = StyleSheet.create({
   },
 
   deleteButton: {
-    backgroundColor: "#E53935",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
+  backgroundColor: "#DC2626",
+  borderRadius: 16,
+  paddingVertical: 14,
+  alignItems: "center",
+},
 
   deleteText: {
     color: "#FFFFFF",
