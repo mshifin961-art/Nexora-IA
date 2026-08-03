@@ -37,7 +37,6 @@ const [totalSales, setTotalSales] = useState(0);
 
 const [totalBills, setTotalBills] = useState(0);
 
-const [selectedBill, setSelectedBill] = useState(null);
 
   useEffect(() => {
     loadBills();
