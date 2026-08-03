@@ -30,6 +30,7 @@ export default function HistoryScreen() {
 
   const [bills, setBills] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedBill, setSelectedBill] = useState(null);
   const [todaySales, setTodaySales] = useState(0);
 
 const [totalSales, setTotalSales] = useState(0);
