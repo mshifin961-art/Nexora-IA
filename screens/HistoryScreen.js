@@ -276,7 +276,6 @@ async function sharePDF(bill) {
 
   </SafeAreaView>
 );
-  );
 
 }
 
