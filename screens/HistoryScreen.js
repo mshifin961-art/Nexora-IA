@@ -4,8 +4,8 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
   StyleSheet,
   Alert,
   Modal,
@@ -31,6 +31,7 @@ export default function HistoryScreen() {
 
   const [bills, setBills] = useState([]);
   const [filteredBills, setFilteredBills] = useState([]);
+
   const [search, setSearch] = useState("");
 
   const [todaySales, setTodaySales] = useState(0);
@@ -43,27 +44,121 @@ export default function HistoryScreen() {
     loadBills();
   }, []);
 
+  useEffect(() => {
+
+    const result = bills.filter((bill) => {
+
+      const customer =
+        (bill.customer || "").toLowerCase();
+
+      const phone =
+        (bill.phone || "").toLowerCase();
+
+      const text = search.toLowerCase();
+
+      return (
+        customer.includes(text) ||
+        phone.includes(text)
+      );
+
+    });
+
+    setFilteredBills(result);
+
+  }, [search, bills]);
+
   async function loadBills() {
-    // Part 2
-  }
+  try {
+    const data = await AsyncStorage.getItem("bills");
 
-  async function deleteBill(id) {
-    // Part 2
-  }
+    const parsedBills = data ? JSON.parse(data) : [];
 
-  async function generatePDF(bill) {
-    // Part 3
-  }
+    setBills(parsedBills);
+    setFilteredBills(parsedBills);
 
-  async function sharePDF(bill) {
-    // Part 3
+    setTotalBills(parsedBills.length);
+
+    let total = 0;
+    let today = 0;
+
+    const todayDate = new Date().toLocaleDateString();
+
+    parsedBills.forEach((bill) => {
+      const amount = Number(bill.total || 0);
+
+      total += amount;
+
+      if (bill.date === todayDate) {
+        today += amount;
+      }
+    });
+
+    setTotalSales(total);
+    setTodaySales(today);
+
+  } catch (error) {
+    Alert.alert("Error", "Unable to load bills.");
   }
+}
+
+async function deleteBill(id) {
+  Alert.alert(
+    "Delete Bill",
+    "Are you sure you want to delete this bill?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updatedBills = bills.filter(
+            (bill) => bill.id !== id
+          );
+
+          await AsyncStorage.setItem(
+            "bills",
+            JSON.stringify(updatedBills)
+          );
+
+          loadBills();
+        },
+      },
+    ]
+  );
+}
+
+async function generatePDF(bill) {
+  Alert.alert(
+    "Coming Soon",
+    "PDF feature will be added in Part 3."
+  );
+}
+
+async function sharePDF(bill) {
+  Alert.alert(
+    "Coming Soon",
+    "Share feature will be added in Part 3."
+  );
+}
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.loadingText}>
-        Nexora History Loading...
-      </Text>
+
+      <View style={styles.center}>
+
+        <Text style={styles.title}>
+          Nexora History V2
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Loading...
+        </Text>
+
+      </View>
+
     </SafeAreaView>
   );
 
@@ -74,14 +169,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0F172A",
+  },
+
+  center: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
 
-  loadingText: {
+  title: {
     color: "#FFFFFF",
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "bold",
+  },
+
+  subtitle: {
+    color: "#94A3B8",
+    fontSize: 16,
+    marginTop: 10,
   },
 
 });
