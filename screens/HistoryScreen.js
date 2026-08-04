@@ -6,37 +6,25 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   TextInput,
-  Modal,
+  Alert,
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+
 import {
   Search,
-  UserRound,
-  Phone,
-  CalendarDays,
-  IndianRupee,
   FileText,
   Share2,
   Trash2,
-  Eye,
 } from "lucide-react-native";
 
 export default function HistoryScreen() {
 
   const [bills, setBills] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedBill, setSelectedBill] = useState(null);
-  const [todaySales, setTodaySales] = useState(0);
-
-const [totalSales, setTotalSales] = useState(0);
-
-const [totalBills, setTotalBills] = useState(0);
-
 
   useEffect(() => {
     loadBills();
@@ -47,301 +35,212 @@ const [totalBills, setTotalBills] = useState(0);
       const data = await AsyncStorage.getItem("bills");
 
       if (data) {
-  const parsed = JSON.parse(data);
-
-  setBills(parsed);
-
-  const today = new Date().toLocaleDateString();
-
-  let total = 0;
-  let todayTotal = 0;
-
-  parsed.forEach((bill) => {
-    total += Number(bill.total || 0);
-
-    if (bill.date === today) {
-      todayTotal += Number(bill.total || 0);
-    }
-  });
-
-  setTotalBills(parsed.length);
-  setTotalSales(total);
-  setTodaySales(todayTotal);
-
-} else {
-  setBills([]);
-  setTotalBills(0);
-  setTotalSales(0);
-  setTodaySales(0);
+        setBills(JSON.parse(data));
+      } else {
+        setBills([]);
       }
+
     } catch (e) {
       Alert.alert("Error", "Unable to load bills");
     }
   }
-
   async function deleteBill(id) {
-    Alert.alert(
-      "Delete Bill",
-      "Are you sure you want to delete this bill?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+  Alert.alert(
+    "Delete Bill",
+    "Are you sure you want to delete this bill?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const updatedBills = bills.filter(
+            (bill) => bill.id !== id
+          );
+
+          setBills(updatedBills);
+
+          await AsyncStorage.setItem(
+            "bills",
+            JSON.stringify(updatedBills)
+          );
         },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const updatedBills = bills.filter(
-              (bill) => bill.id !== id
-            );
+      },
+    ]
+  );
+}
 
-            setBills(updatedBills);
+async function generatePDF(bill) {
+  try {
 
-            await AsyncStorage.setItem(
-              "bills",
-              JSON.stringify(updatedBills)
-            );
-          },
-        },
-      ]
-    );
-  }
+    let itemsHTML = "";
 
-  async function generatePDF(bill) {
-    try {
+    bill.items.forEach((item) => {
+      itemsHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>₹${item.price}</td>
+        <td>₹${item.qty * item.price}</td>
+      </tr>
+      `;
+    });
 
-      let itemsHTML = "";
+    const html = `
+    <html>
+    <body>
 
-      bill.items.forEach((item) => {
-        itemsHTML += `
-          <tr>
-            <td>${item.name}</td>
-            <td>${item.qty}</td>
-            <td>₹${item.price}</td>
-            <td>₹${item.price * item.qty}</td>
-          </tr>
-        `;
-      });
-
-      const html = `
-      <html>
-      <body>
-
-      <h1>Nexora AI</h1>
+      <h1>Nexora AI Invoice</h1>
 
       <h3>Customer : ${bill.customer}</h3>
-
       <h3>Phone : ${bill.phone}</h3>
 
       <p>Date : ${bill.date}</p>
 
-      <table border="1"
-      cellspacing="0"
-      cellpadding="8"
-      width="100%">
+      <table border="1" cellspacing="0" cellpadding="8" width="100%">
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
 
-      <tr>
-      <th>Product</th>
-      <th>Qty</th>
-      <th>Price</th>
-      <th>Total</th>
-      </tr>
-
-      ${itemsHTML}
+        ${itemsHTML}
 
       </table>
 
       <h2>Total : ₹${bill.total}</h2>
 
-      </body>
-      </html>
-      `;
+    </body>
+    </html>
+    `;
 
-      const pdf = await Print.printToFileAsync({
-        html,
-      });
+    const pdf = await Print.printToFileAsync({
+      html,
+    });
 
-      return pdf.uri;
+    return pdf.uri;
 
-    } catch (e) {
-      Alert.alert(
-        "Error",
-        "Unable to generate PDF"
-      );
-      return null;
-    }
+  } catch (e) {
+    Alert.alert("Error", "Unable to generate PDF");
+    return null;
   }
+}
 
-  async function sharePDF(bill) {
+async function sharePDF(bill) {
 
-    const uri = await generatePDF(bill);
+  const uri = await generatePDF(bill);
 
-    if (!uri) return;
+  if (!uri) return;
 
-    await Sharing.shareAsync(uri);
+  await Sharing.shareAsync(uri);
 
-  }
+}
 
-  const filteredBills = bills.filter((bill) => {
+const filteredBills = bills.filter((bill) => {
 
-    const customer =
-      (bill.customer || "").toLowerCase();
+  const customer =
+    (bill.customer || "").toLowerCase();
 
-    const phone =
-      (bill.phone || "").toLowerCase();
+  const phone =
+    (bill.phone || "").toLowerCase();
 
-    return (
-      customer.includes(search.toLowerCase()) ||
-      phone.includes(search.toLowerCase())
-    );
+  return (
+    customer.includes(search.toLowerCase()) ||
+    phone.includes(search.toLowerCase())
+  );
 
-  });
-    return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+});
+  return (
+  <SafeAreaView style={styles.container}>
+    <ScrollView showsVerticalScrollIndicator={false}>
 
-        <Text style={styles.title}>
-          Bill History
+      <Text style={styles.title}>
+        Bill History
+      </Text>
+
+      <View style={styles.searchBox}>
+
+        <Search size={20} color="#94A3B8" />
+
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search customer..."
+          placeholderTextColor="#94A3B8"
+          value={search}
+          onChangeText={setSearch}
+        />
+
+      </View>
+
+      {filteredBills.length === 0 ? (
+
+        <Text style={styles.emptyText}>
+          No Bills Found
         </Text>
-      <View style={styles.summaryRow}>
 
-  <View style={styles.summaryCard}>
-    <Text style={styles.summaryTitle}>
-      Bills
-    </Text>
+      ) : (
 
-    <Text style={styles.summaryValue}>
-      {totalBills}
-    </Text>
-  </View>
+        filteredBills.map((bill) => (
 
-  <View style={styles.summaryCard}>
-    <Text style={styles.summaryTitle}>
-      Today
-    </Text>
+          <View
+            key={bill.id}
+            style={styles.billCard}
+          >
 
-    <Text style={styles.summaryValue}>
-      ₹{todaySales}
-    </Text>
-  </View>
+            <Text style={styles.customer}>
+              👤 {bill.customer}
+            </Text>
 
-  <View style={styles.summaryCard}>
-    <Text style={styles.summaryTitle}>
-      Total
-    </Text>
+            <Text style={styles.phone}>
+              📞 {bill.phone}
+            </Text>
 
-    <Text style={styles.summaryValue}>
-      ₹{totalSales}
-    </Text>
-  </View>
+            <Text style={styles.date}>
+              📅 {bill.date}
+            </Text>
 
-</View>
-      
+            <Text style={styles.total}>
+              ₹{bill.total}
+            </Text>
 
-        <View style={styles.searchContainer}>
+            <View style={styles.buttonRow}>
 
-  <Search
-    size={20}
-    color="#94A3B8"
-  />
+              <TouchableOpacity
+                style={styles.pdfButton}
+                onPress={() => generatePDF(bill)}
+              >
+                <FileText size={20} color="#FFFFFF" />
+              </TouchableOpacity>
 
-  <TextInput
-    style={styles.searchInput}
-    placeholder="Search customer..."
-    placeholderTextColor="#94A3B8"
-    value={search}
-    onChangeText={setSearch}
-  />
-
-</View>
-
-        {filteredBills.length === 0 ? (
-
-          <Text style={styles.emptyText}>
-            No Bills Found
-          </Text>
-
-        ) : (
-
-          filteredBills.map((bill) => (
-
-            <View
-  key={bill.id}
-  style={[
-    styles.billCard,
-    {
-      borderWidth: 1,
-      borderColor: "#334155",
-      shadowColor: "#000",
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      shadowOffset: {
-        width: 0,
-        height: 6,
-      },
-      elevation: 8,
-    },
-  ]}
->
-
-              <Text style={styles.customer}>
-                👤 {bill.customer || "Unknown Customer"}
-              </Text>
-
-              <Text style={styles.phone}>
-                📞 {bill.phone || "-"}
-              </Text>
-
-              <Text style={styles.total}>
-                💰 ₹{bill.total}
-              </Text>
-
-              <Text style={styles.date}>
-                📅 {bill.date}
-              </Text>
-
-              <View style={styles.buttonRow}>
-
-                <TouchableOpacity
-                  style={styles.pdfButton}
-                  onPress={() => generatePDF(bill)}
-                >
-                  <FileText size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.shareButton}
-                  onPress={() => sharePDF(bill)}
-                >
-                  <Share2 size={20} color="#FFFFFF" />
-                </TouchableOpacity>
-
-              </View>
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={() => sharePDF(bill)}
+              >
+                <Share2 size={20} color="#FFFFFF" />
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => deleteBill(bill.id)}
               >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-  <Trash2 size={18} color="#FFFFFF" />
-  <Text style={[styles.deleteText, { marginLeft: 8 }]}>
-    Delete Bill
-  </Text>
-</View>
+                <Trash2 size={20} color="#FFFFFF" />
               </TouchableOpacity>
 
             </View>
 
-          ))
+          </View>
 
-        )}
+        ))
 
-      </ScrollView>
-        
-    </SafeAreaView>
-  );
-}
+      )}
+
+    </ScrollView>
+  </SafeAreaView>
+);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -356,36 +255,36 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  searchContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#1E293B",
-  borderRadius: 14,
-  paddingHorizontal: 14,
-  marginBottom: 20,
-},
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E293B",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+  },
 
-searchInput: {
-  flex: 1,
-  color: "#FFFFFF",
-  fontSize: 16,
-  paddingVertical: 14,
-  marginLeft: 10,
-},
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 16,
+    paddingVertical: 14,
+    marginLeft: 10,
+  },
 
   emptyText: {
     color: "#94A3B8",
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 60,
     fontSize: 18,
   },
 
   billCard: {
-  backgroundColor: "#1E293B",
-  borderRadius: 20,
-  padding: 20,
-  marginBottom: 18,
-},
+    backgroundColor: "#1E293B",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 16,
+  },
 
   customer: {
     color: "#FFFFFF",
@@ -400,94 +299,48 @@ searchInput: {
     marginBottom: 6,
   },
 
-  total: {
-    color: "#22C55E",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-
   date: {
     color: "#94A3B8",
     fontSize: 14,
+    marginBottom: 6,
+  },
+
+  total: {
+    color: "#22C55E",
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 14,
   },
-  summaryRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  marginBottom: 20,
-},
-
-summaryCard: {
-  flex: 1,
-  backgroundColor: "#1E293B",
-  borderRadius: 16,
-  paddingVertical: 16,
-  alignItems: "center",
-  marginHorizontal: 4,
-},
-
-summaryTitle: {
-  color: "#94A3B8",
-  fontSize: 13,
-  marginBottom: 6,
-},
-
-summaryValue: {
-  color: "#FFFFFF",
-  fontSize: 20,
-  fontWeight: "bold",
-},
 
   buttonRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  marginTop: 14,
-  marginBottom: 14,
-},
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
 
   pdfButton: {
-  width: 52,
-  height: 52,
-  borderRadius: 16,
-  backgroundColor: "#2563EB",
-  justifyContent: "center",
-  alignItems: "center",
-},
+    width: 56,
+    height: 56,
+    backgroundColor: "#2563EB",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   shareButton: {
-  width: 52,
-  height: 52,
-  borderRadius: 16,
-  backgroundColor: "#22C55E",
-  justifyContent: "center",
-  alignItems: "center",
-},
-  viewButton: {
-  width: 52,
-  height: 52,
-  borderRadius: 16,
-  backgroundColor: "#7C3AED",
-  justifyContent: "center",
-  alignItems: "center",
-},
-  
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16,
+    width: 56,
+    height: 56,
+    backgroundColor: "#22C55E",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   deleteButton: {
-  backgroundColor: "#DC2626",
-  borderRadius: 16,
-  paddingVertical: 14,
-  alignItems: "center",
-},
-
-  deleteText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16,
+    width: 56,
+    height: 56,
+    backgroundColor: "#DC2626",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
