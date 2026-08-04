@@ -145,48 +145,276 @@ async function sharePDF(bill) {
 }
 
   return (
-    <SafeAreaView style={styles.container}>
+  <SafeAreaView style={styles.container}>
 
-      <View style={styles.center}>
+    <Text style={styles.title}>
+      Bill History
+    </Text>
 
-        <Text style={styles.title}>
-          Nexora History V2
+    <View style={styles.searchBox}>
+
+      <Search size={20} color="#94A3B8" />
+
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search customer or phone..."
+        placeholderTextColor="#94A3B8"
+        value={search}
+        onChangeText={setSearch}
+      />
+
+    </View>
+
+    <View style={styles.summaryRow}>
+
+      <View style={styles.summaryCard}>
+        <IndianRupee size={22} color="#22C55E" />
+        <Text style={styles.summaryValue}>
+          ₹{todaySales}
         </Text>
-
-        <Text style={styles.subtitle}>
-          Loading...
+        <Text style={styles.summaryLabel}>
+          Today
         </Text>
-
       </View>
 
-    </SafeAreaView>
+      <View style={styles.summaryCard}>
+        <FileText size={22} color="#3B82F6" />
+        <Text style={styles.summaryValue}>
+          {totalBills}
+        </Text>
+        <Text style={styles.summaryLabel}>
+          Bills
+        </Text>
+      </View>
+
+      <View style={styles.summaryCard}>
+        <IndianRupee size={22} color="#F59E0B" />
+        <Text style={styles.summaryValue}>
+          ₹{totalSales}
+        </Text>
+        <Text style={styles.summaryLabel}>
+          Total
+        </Text>
+      </View>
+
+    </View>
+
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+    >
+
+      {filteredBills.length === 0 ? (
+
+        <Text style={styles.emptyText}>
+          No Bills Found
+        </Text>
+
+      ) : (
+
+        filteredBills.map((bill) => (
+
+          <View
+            key={bill.id}
+            style={styles.billCard}
+          >
+
+            <Text style={styles.customer}>
+              {bill.customer}
+            </Text>
+
+            <Text style={styles.phone}>
+              {bill.phone}
+            </Text>
+
+            <Text style={styles.date}>
+              {bill.date}
+            </Text>
+
+            <Text style={styles.total}>
+              ₹{bill.total}
+            </Text>
+
+            <View style={styles.buttonRow}>
+
+              <TouchableOpacity
+                style={styles.pdfButton}
+                onPress={() => generatePDF(bill)}
+              >
+                <FileText size={20} color="#FFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={() => sharePDF(bill)}
+              >
+                <Share2 size={20} color="#FFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.viewButton}
+                onPress={() => setSelectedBill(bill)}
+              >
+                <Eye size={20} color="#FFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => deleteBill(bill.id)}
+              >
+                <Trash2 size={20} color="#FFF" />
+              </TouchableOpacity>
+
+            </View>
+
+          </View>
+
+        ))
+
+      )}
+
+    </ScrollView>
+
+  </SafeAreaView>
+);
   );
 
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: "#0F172A",
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 20,
   },
 
   title: {
     color: "#FFFFFF",
-    fontSize: 28,
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E293B",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+  },
+
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 16,
+    marginLeft: 10,
+    paddingVertical: 14,
+  },
+
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+
+  summaryCard: {
+    flex: 1,
+    backgroundColor: "#1E293B",
+    marginHorizontal: 4,
+    borderRadius: 18,
+    padding: 14,
+    alignItems: "center",
+  },
+
+  summaryValue: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 8,
+  },
+
+  summaryLabel: {
+    color: "#94A3B8",
+    marginTop: 4,
+    fontSize: 13,
+  },
+
+  emptyText: {
+    color: "#94A3B8",
+    textAlign: "center",
+    marginTop: 60,
+    fontSize: 18,
+  },
+
+  billCard: {
+    backgroundColor: "#1E293B",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 16,
+  },
+
+  customer: {
+    color: "#FFFFFF",
+    fontSize: 18,
     fontWeight: "bold",
   },
 
-  subtitle: {
-    color: "#94A3B8",
-    fontSize: 16,
-    marginTop: 10,
+  phone: {
+    color: "#CBD5E1",
+    marginTop: 6,
   },
 
+  date: {
+    color: "#94A3B8",
+    marginTop: 6,
+  },
+
+  total: {
+    color: "#22C55E",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 14,
+  },
+
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  pdfButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  shareButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "#22C55E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  viewButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "#7C3AED",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  deleteButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "#DC2626",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
