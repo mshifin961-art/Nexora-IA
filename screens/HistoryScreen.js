@@ -316,12 +316,6 @@ const [totalBills, setTotalBills] = useState(0);
                 >
                   <Share2 size={20} color="#FFFFFF" />
                 </TouchableOpacity>
-                    <TouchableOpacity
-  style={styles.viewButton}
-  onPress={() => setSelectedBill(bill)}
->
-  <Eye size={20} color="#FFFFFF" />
-</TouchableOpacity>
 
               </View>
 
@@ -344,81 +338,7 @@ const [totalBills, setTotalBills] = useState(0);
         )}
 
       </ScrollView>
-        <Modal
-  visible={selectedBill !== null}
-  transparent={true}
-  animationType="slide"
-  onRequestClose={() => setSelectedBill(null)}
->
-  <View
-    style={{
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.6)",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 20,
-    }}
-  >
-    <View
-      style={{
-        width: "100%",
-        backgroundColor: "#1E293B",
-        borderRadius: 20,
-        padding: 20,
-      }}
-    >
-      <Text
-        style={{
-          color: "#FFFFFF",
-          fontSize: 22,
-          fontWeight: "bold",
-          marginBottom: 15,
-        }}
-      >
-        Bill Details
-      </Text>
-
-      {selectedBill && (
-        <>
-          <Text style={{ color: "#FFFFFF", marginBottom: 8 }}>
-            Customer: {selectedBill.customer}
-          </Text>
-
-          <Text style={{ color: "#FFFFFF", marginBottom: 8 }}>
-            Phone: {selectedBill.phone}
-          </Text>
-
-          <Text style={{ color: "#22C55E", marginBottom: 8 }}>
-            Total: ₹{selectedBill.total}
-          </Text>
-
-          <Text style={{ color: "#94A3B8", marginBottom: 15 }}>
-            Date: {selectedBill.date}
-          </Text>
-        </>
-      )}
-
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#2563EB",
-          padding: 14,
-          borderRadius: 14,
-          alignItems: "center",
-        }}
-        onPress={() => setSelectedBill(null)}
-      >
-        <Text
-          style={{
-            color: "#FFFFFF",
-            fontWeight: "bold",
-          }}
-        >
-          Close
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
+        
     </SafeAreaView>
   );
 }
